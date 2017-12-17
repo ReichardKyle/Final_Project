@@ -1,0 +1,44 @@
+File=open('/Users/Kylereichard/Desktop/Correct.txt', "r")
+Text=File.read()
+File.close()
+rows=Text.split('\n')
+data=[]
+for r in rows[1:]:
+data.append(r.split(','))
+d={}
+for row in data:
+    key=row[0] + '.' + row[1]
+    if key in d:
+        d[key].append(float(row[2]))
+    else:
+        d[key]= [float(row[2])]
+#This makes data in the format we want so that we
+#can subset by both target gene and genotypic group
+
+#Next we will average the data by groups for the reference gene
+#(Actin in this case)
+ref_wt_avg= sum(d['Actin.WT'])/9
+ref_het_avg= sum(d['Actin.HET'])/9
+ref_null_avg= sum(d['Actin.NULL'])/9
+
+# And the same for target gene (bdnf)
+exp_wt_avg= sum(d['bdnf.WT'])/9
+exp_het_avg= sum(d['bdnf.HET'])/9
+exp_null_avg= sum(d['bdnf.NULL'])/9
+
+# control wt is the normalized difference for WT and the 2 genes
+controlWT= exp_wt_avg-ref_wt_avg
+#Then we do the same thing for experiment genotypes (Het and Null)
+HET = exp_het_avg - ref_het_avg
+NULL= exp_null_avg - ref_null_avg
+
+#Then we subtract the difference from the difference in the WT groups
+
+delta_het= HET- controlWT
+delta_null= NULL- controlWT
+
+Het_fold_change= 2**(-delta_het)
+Null_fold_change= 2**(-delta_null)
+
+print("The average fold change for the Het group is" + " " + str(Het_fold_change))
+print("The average fold change for the Null group is" + " " + str(Null_fold_change))
